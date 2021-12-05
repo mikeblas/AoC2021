@@ -1,5 +1,6 @@
 import pprint
 
+
 class Coord:
     def __init__(self, x, y):
         self.x = x
@@ -17,6 +18,7 @@ class Coord:
     def __repr__(self):
         return f"({self.x}, {self.y})"
 
+
 def coord_from_string(str):
     parsed = str.split(",")
     x = int(parsed[0])
@@ -24,34 +26,24 @@ def coord_from_string(str):
     # print(f"got {x}, {y}")
     return Coord(x, y)
 
+
+def sign_funct(num):
+    if num > 0:
+        return 1
+    elif num < 0:
+        return -1
+    else:
+        return 0
+
+
 def process_points(the_map, start_coord, end_coord, only_right):
 
-    dx, dy = (0, 0)
-    if start_coord.x == end_coord.x:
-        dx = 0
-        if start_coord.y > end_coord.y:
-            dy = -1
-        else:
-            dy = 1
-    elif start_coord.y == end_coord.y:
-        dy = 0
-        if start_coord.x > end_coord.x:
-            dx = -1
-        else:
-            dx = 1
-    else:
-        if only_right:
-            print("   not right")
-            return
-        else:
-            if start_coord.y > end_coord.y:
-                dy = -1
-            else:
-                dy = 1
-            if start_coord.x > end_coord.x:
-                dx = -1
-            else:
-                dx = 1
+    dx = sign_funct(end_coord.x - start_coord.x)
+    dy = sign_funct(end_coord.y - start_coord.y)
+
+    if only_right and (dx != 0 and dy != 0):
+        print("   not right")
+        return
 
     x = start_coord.x
     y = start_coord.y
