@@ -1,5 +1,4 @@
 
-
 import pprint
 
 def two_fuel(pos, target):
@@ -11,7 +10,7 @@ with open('input.txt') as my_file:
 input_lines = [s.strip() for s in input_lines]
 line_count = len(input_lines)
 
-print(line_count)
+print(f"{line_count} lines read")
 # pprint.pprint(input_lines)
 
 my_count = 0
@@ -25,7 +24,12 @@ for line in input_lines:
             # print(digit)
             my_count += 1
 
-print(my_count)
+print(f"{my_count} digits are 1, 4, 7, or 8)")
+
+
+# -- part 2
+
+
 
 
 
