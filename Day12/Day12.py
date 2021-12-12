@@ -1,9 +1,12 @@
 import pprint
+import time
+
 
 class Graph:
 
     def __init__(self):
         self.points = dict()
+        self.paths = []
 
     def add_point(self, start, end):
         if start not in self.points:
@@ -12,9 +15,9 @@ class Graph:
             self.points[end] = []
         self.points[end].append(start)
         self.points[start].append(end)
-        self.paths = []
 
-    def reentrant(self, next_place):
+    @staticmethod
+    def reentrant(next_place):
         if next_place == next_place.upper():
             return True
         return False
@@ -24,7 +27,7 @@ class Graph:
         for next_place in place_paths:
             if next_place == "end":
                 self.paths.append(visited + [place] + ["end"])
-            elif self.reentrant(next_place) or next_place not in visited:
+            elif Graph.reentrant(next_place) or next_place not in visited:
                 self.more_traversals(next_place, self.points[next_place], visited + [place])
 
     def all_traversals(self):
@@ -36,11 +39,11 @@ class Graph:
 
         return self.paths
 
-
-    def get_histogram(self, visited):
+    @staticmethod
+    def get_histogram(visited):
         histogram = {}
         for place in visited:
-            if self.reentrant(place):
+            if Graph.reentrant(place):
                 continue
             if place not in histogram:
                 histogram[place] = 1
@@ -48,39 +51,43 @@ class Graph:
                 histogram[place] += 1
         return histogram
 
-
-    def can_enter(self, visited, target):
+    @staticmethod
+    def can_enter(visited, target, mode):
 
         # can't enter start
         if target == 'start':
-            return False
+            return 2
 
         # if reentrant, we can always visit
-        if self.reentrant(target):
-            return True
+        if Graph.reentrant(target):
+            return mode
 
         # if never entered, we can visit
         if target not in visited:
-            return True
+            return mode
+
+        if mode == 1:
+            return 2
 
         # target was visited before, but we must be sure no other was visited before
-        histogram = self.get_histogram(visited)
+        histogram = Graph.get_histogram(visited)
         if not any(v >= 2 for v in iter(histogram.values())):
             # print(f"{visited} towards {target} == TRUE")
-            return True
+            return 1
 
         # otherwise, no
-        return False
+        return 2
 
-    def more_traversals2(self, place, place_paths, visited):
+    def more_traversals2(self, place, place_paths, visited, mode):
 
         if place == "end":
             self.paths.append(visited + ["end"])
             # print(f"added {visited + ['end']}")
         else:
             for next_place in place_paths:
-                if self.can_enter(visited + [place], next_place):
-                    self.more_traversals2(next_place, self.points[next_place], visited + [place])
+                result = Graph.can_enter(visited + [place], next_place, mode)
+                if result in [0, 1]:
+                    self.more_traversals2(next_place, self.points[next_place], visited + [place], result)
 
 
     def all_traversals2(self):
@@ -88,7 +95,7 @@ class Graph:
         self.paths.clear()
         visited = []
 
-        self.more_traversals2("start", self.points["start"], [])
+        self.more_traversals2("start", self.points["start"], [], 0)
 
         return self.paths
 
@@ -114,8 +121,9 @@ the_graph.all_traversals()
 # print(f"{the_graph.paths}")
 print(f"{len(the_graph.paths)}")
 
-
-# 195155 is too high
+start = time.time_ns()
 the_graph.all_traversals2()
+end = time.time_ns()
 # pprint.pprint(the_graph.paths)
 print(f"{len(the_graph.paths)}")
+print(f"{(end - start) / (10**9)} s elapsed")
