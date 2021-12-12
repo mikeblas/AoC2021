@@ -66,6 +66,7 @@ class Graph:
         # target was visited before, but we must be sure no other was visited before
         histogram = self.get_histogram(visited)
         if not any(v >= 2 for v in iter(histogram.values())):
+            # print(f"{visited} towards {target} == TRUE")
             return True
 
         # otherwise, no
@@ -75,9 +76,10 @@ class Graph:
 
         if place == "end":
             self.paths.append(visited + ["end"])
+            # print(f"added {visited + ['end']}")
         else:
             for next_place in place_paths:
-                if self.can_enter(visited, next_place):
+                if self.can_enter(visited + [place], next_place):
                     self.more_traversals2(next_place, self.points[next_place], visited + [place])
 
 
@@ -92,7 +94,7 @@ class Graph:
 
 
 
-with open('sample2.txt') as my_file:
+with open('input.txt') as my_file:
     input_lines = my_file.readlines()
 input_lines = [s.strip() for s in input_lines]
 line_count = len(input_lines)
@@ -115,5 +117,5 @@ print(f"{len(the_graph.paths)}")
 
 # 195155 is too high
 the_graph.all_traversals2()
-pprint.pprint(the_graph.paths)
+# pprint.pprint(the_graph.paths)
 print(f"{len(the_graph.paths)}")
