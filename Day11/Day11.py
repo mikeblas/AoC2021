@@ -41,7 +41,7 @@ def test_flash(y, x):
                     places[y+dy][x+dx] += 1
                     test_flash(y+dy, x+dx)
 
-while step_count <= 100:
+while step_count <= 2000:
     # add one to everyone
     for y in range(0, len(places)):
         for x in range(0, len(places[y])):
@@ -51,11 +51,16 @@ while step_count <= 100:
     # pprint.pprint(flashed)
 
     # see who flashes
+    before = total_flashes
     for y in range(0, len(places)):
         for x in range(0, len(places[y])):
             test_flash(y, x)
+    after = total_flashes
 
-    print(f"step {step_count}: {total_flashes} flashes")
+    print(f"step {step_count}: {total_flashes} total flashes, {after - before} flashes this time")
+    if after - before == len(places) * len(places[y]):
+        print("Found it!")
+        break
     # pprint.pprint(places)
     # pprint.pprint(flashed)
     # print()
