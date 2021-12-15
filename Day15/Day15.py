@@ -13,7 +13,7 @@ class CellChoice:
 
     def __lt__(self, other):
         if self.distance == other.distance:
-            if (self.x != other.x):
+            if self.x != other.x:
                 return self.x < other.x
             else:
                 return self.y < other.y
@@ -21,8 +21,14 @@ class CellChoice:
             return self.distance < other.distance
 
 
-def min_cost3(cells, cols, rows):
+def get_cell_part1(cells, x, y):
+    return cells[y][x]
 
+
+def min_cost3(cells, get_cell):
+
+    cols = len(cells[0])
+    rows = len(cells)
     tc = [[sys.maxsize for x in range(cols)] for y in range(rows)]
     tc[0][0] = 0
 
@@ -45,7 +51,7 @@ def min_cost3(cells, cols, rows):
             if x >= cols or y >= rows:
                 continue
 
-            if tc[y][x] > tc[this_cell.y][this_cell.x] + cells[y][x]:
+            if tc[y][x] > tc[this_cell.y][this_cell.x] + get_cell(cells, x, y):
 
                 if tc[y][x] != sys.maxsize:
                     for n in range(len(pq)):
@@ -54,7 +60,7 @@ def min_cost3(cells, cols, rows):
                             heapq.heapify(pq)
                             break
 
-                tc[y][x] = tc[this_cell.y][this_cell.x] + cells[y][x]
+                tc[y][x] = tc[this_cell.y][this_cell.x] + get_cell(cells, x, y)
                 pq.append(CellChoice(x, y, tc[y][x]))
                 heapq.heapify(pq)
 
@@ -72,8 +78,9 @@ def main():
     print(f"width is {len(cells[0])}")
     print(f"height  is {len(cells)}")
 
-    print(min_cost3(cells, len(cells[0]), len(cells)))
+    print(min_cost3(cells, get_cell_part1))
 
 
 if __name__ == '__main__':
     main()
+
