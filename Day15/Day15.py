@@ -24,13 +24,34 @@ class CellChoice:
 def get_cell_part1(cells, x, y):
     return cells[y][x]
 
+def get_cell_part2(cells, x, y):
 
-def min_cost3(cells, get_cell):
+    width = len(cells[0])
+    height = len(cells)
 
-    cols = len(cells[0])
-    rows = len(cells)
+    x_block = int(x / width)
+    y_block = int(y / height)
+
+    val = cells[y % height][x % width]
+    val += x_block + y_block
+
+    val = ((val - 1) % 9) + 1
+
+    return val
+
+
+
+
+
+def min_cost3(cells, dimensions, get_cell):
+
+    cols = dimensions[0]
+    rows = dimensions[1]
     tc = [[sys.maxsize for x in range(cols)] for y in range(rows)]
     tc[0][0] = 0
+
+    mql = 0
+    iterations = 0
 
     deltas = [ (-1, 0), (0, 1), (1, 0), (0, -1) ]
 
@@ -40,7 +61,13 @@ def min_cost3(cells, get_cell):
 
     while len(pq) > 0:
 
-        this_cell = pq.pop(0)
+        if len(pq) > mql:
+            mql = len(pq)
+            # print(f"mql = {mql} at iteration {iterations}")
+        iterations += 1
+
+        # this_cell = pq.pop(0)
+        this_cell = heapq.heappop(pq)
 
         for (dx, dy) in deltas:
             x = dx + this_cell.x
@@ -61,10 +88,24 @@ def min_cost3(cells, get_cell):
                             break
 
                 tc[y][x] = tc[this_cell.y][this_cell.x] + get_cell(cells, x, y)
-                pq.append(CellChoice(x, y, tc[y][x]))
-                heapq.heapify(pq)
+                heapq.heappush(pq, CellChoice(x, y, tc[y][x]))
 
-    return tc[rows-1][cols-1]
+    ret = tc[rows-1][cols-1]
+    print(f"answer = {ret}, after {iterations} iterations and a max queue length of {mql}")
+
+    return ret
+
+
+def test_part2(cells):
+    for x in range(len(cells[0])*5):
+        print(f"{get_cell_part2(cells, x, 0)} ", end='')
+    print()
+
+    test_cells = [[8]]
+    for y in range(5):
+        for x in range(5):
+            print(f"{get_cell_part2(test_cells, x, y)} ", end='')
+        print()
 
 
 def main():
@@ -78,7 +119,12 @@ def main():
     print(f"width is {len(cells[0])}")
     print(f"height  is {len(cells)}")
 
-    print(min_cost3(cells, get_cell_part1))
+    dim = (len(cells[0]), len(cells))
+    print(min_cost3(cells, dim, get_cell_part1))
+
+    # test_part2(cells)
+
+    print(min_cost3(cells, tuple([5*x for x in dim]), get_cell_part2))
 
 
 if __name__ == '__main__':
