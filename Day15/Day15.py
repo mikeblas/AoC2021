@@ -1,5 +1,7 @@
+import heapq
 import sys
 import pprint
+from queue import PriorityQueue
 
 with open('input.txt') as my_file:
     input_lines = my_file.readlines()
@@ -11,61 +13,66 @@ cells = [[int(x) for x in line] for line in input_lines]
 print(f"width is {len(cells[0])}")
 print(f"height  is {len(cells)}")
 
-calls = 0
 
-def min_cost(x, y):
+class CellChoice:
+    def __init__(self, x, y, distance):
+        self.x = x
+        self.y = y
+        self.distance = distance
 
-    global calls
-    calls += 1
-    if x < 0 or y < 0:
-        ret = sys.maxsize
-    elif x == 0 and y == 0:
-        ret = 0
-    else:
-        ret = cells[y][x] + min(min_cost(x-1, y),  min_cost(x, y-1))
+    def __repr__(self):
+        return f"{self.x}, {self.y}: {self.distance}"
 
-    return ret
+    def __lt__(self, other):
+        if self.distance == other.distance:
+            if (self.x != other.x):
+                return self.x < other.x
+            else:
+                return self.y < other.y
+        else:
+            return self.distance < other.distance
 
 
-def min_cost2(x, y):
 
-    tc = [[None for x2 in range(x+1)] for y2 in range(y+1)]
-    # tc[0][0] = cells[0][0]
+def min_cost3(cols, rows):
+
+    tc = [[sys.maxsize for x in range(cols)] for y in range(rows)]
     tc[0][0] = 0
 
-    for i in range(1, y + 1):
-        tc[i][0] = tc[i - 1][0] + cells[i][0]
+    deltas = [ (-1, 0), (0, 1), (1, 0), (0, -1) ]
 
-    for j in range(1, x + 1):
-        tc[0][j] = tc[0][j - 1] + cells[0][j]
+    # start at 0,0
+    pq = [CellChoice(0, 0, 0)]
+    heapq.heapify(pq)
 
-    for i in range(y + 1):
-        for j in range(x + 1):
-            if tc[i][j] is None:
-                s = "    "
-            else:
-                s = f"{tc[i][j]:3} "
-            print(f"{s}", end='')
-        print()
+    while len(pq) > 0:
+
+        this_cell = pq.pop(0)
+
+        for (dx, dy) in deltas:
+            x = dx + this_cell.x
+            y = dy + this_cell.y
+
+            if x < 0 or y < 0:
+                continue
+            if x >= cols or y >= rows:
+                continue
+
+            if tc[y][x] > tc[this_cell.y][this_cell.x] + cells[y][x]:
+
+                if tc[y][x] != sys.maxsize:
+                    for n in range(len(pq)):
+                        if pq[n].x == x and pq[n].y == y:
+                            del [n]
+                            heapq.heapify(pq)
+                            break
+
+                tc[y][x] = tc[this_cell.y][this_cell.x] + cells[y][x]
+                pq.append(CellChoice(x, y, tc[y][x]))
+                heapq.heapify(pq)
+
+    return tc[rows-1][cols-1]
 
 
-    print("-------")
 
-    for j in range(1, x + 1):
-        for i in range(1, y + 1):
-            left = tc[i][j]
-            tc[i][j] = min(tc[i - 1][j], tc[i][j - 1]) + cells[i][j]
-
-    for i in range(y + 1):
-        for j in range(x + 1):
-            print(f"{tc[i][j]:3} ", end='')
-        print()
-
-    # pprint.pprint(tc)
-    return tc[y][x]
-
-
-# print(min_cost(len(cells[0])-1, len(cells)-1))
-print(calls)
-
-print(min_cost2(len(cells[0])-1, len(cells)-1))
+print(min_cost3(len(cells[0]), len(cells)))
