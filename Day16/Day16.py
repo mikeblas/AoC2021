@@ -1,5 +1,8 @@
 version_sum = 0
 
+
+
+
 def get_version_type(bits, idx):
     version = int(bits[idx:idx+3], 2)
     global version_sum
@@ -23,7 +26,6 @@ def get_operator(bits, idx):
         packet_count = int(bits[idx+1:idx+12], 2)
         idx += 12
         print(f" operator packets, count = {packet_count}")
-
         while packet_count > 0:
             idx = read_packet(bits, idx)
             packet_count -= 1
@@ -60,7 +62,7 @@ def read_packet(bits, idx):
 
 
 def main():
-    with open('input.txt') as my_file:
+    with open('sample1_8.txt') as my_file:
         input_lines = my_file.readlines()
     input_lines = [s.strip() for s in input_lines]
     line_count = len(input_lines)
