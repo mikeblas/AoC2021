@@ -1,15 +1,60 @@
 import sys
 
-def dissolve(num, level, tl):
 
-    if type(num) == tuple:
-        tl = dissolve(num[0], level+1, tl)
-        tl = dissolve(num[1], level+1, tl)
-        return tl
-    else:
-        print(f"{' ' * level}: {num}")
-        tl.append((level, num))
-        return tl
+class XNode:
+    def __init__(self, b, a):
+        if type(a) == int:
+            self.left_int = a
+            self.left_child = None
+        else:
+            self.left_int = None
+            self.left_child = a
+
+        if type(b) == int:
+            self.right_int = b
+            self.right_child = None
+        else:
+            self.right_int = None
+            self.right_child = b
+
+    def __repr__(self):
+        lhs = f"{self.left_int}" if self.left_int is not None else f"{self.left_child}"
+        rhs = f"{self.right_int}" if self.right_int is not None else f"{self.right_child}"
+        return f"({lhs}, {rhs})"
+
+    def traverse(self, level):
+
+        if self.left_int is not None:
+            print(f"{' ' * level}: {self.left_int}")
+        else:
+            self.left_child.traverse(level+1)
+
+        if self.right_int is not None:
+            print(f"{' ' * level}: {self.right_int}")
+        else:
+            self.right_child.traverse(level+1)
+
+
+    def magnitude(self):
+
+        if self.left_int is not None:
+            lhs = self.left_int
+        else:
+            lhs = self.left_child.magnitude()
+
+        if self.right_int is not None:
+            rhs = self.right_int
+        else:
+            rhs = self.right_child.magnitude()
+
+        return 3 * lhs + 2 * rhs
+
+
+
+
+def add(lhs, rhs):
+    result = XNode(rhs, lhs)
+    return result
 
 
 def main():
@@ -31,40 +76,28 @@ def main():
             elif ch == ',':
                 continue
             elif ch == ']':
-                a = stak.pop()
-                b = stak.pop()
-                stak.append((b, a))
+                xa = stak.pop()
+                xb = stak.pop()
+                x = XNode(xa, xb)
+                stak.append(x)
 
-        print(f"{stak}, {len(stak)}")
         num = stak[0]
+        print(f"num = {num}")
+        print(f"magnitude = {num.magnitude()}")
 
-        q = dissolve(num, 0, [])
-        print(f"q = {q}")
+        num.traverse(0)
 
-        cur_level = 0
-        first = True
-        level_stack = []
-        for level, number in q:
-            if cur_level < level:
-                print('(' * (level-cur_level), end='')
-                for x in range(level - cur_level):
-                    level_stack.append(True)
-                cur_level = level
-            elif cur_level > level:
-                print(')' * (cur_level - level), end='')
-                for x in range(cur_level - level):
-                    level_stack.pop()
-                cur_level = level
-            else:
-                if level_stack[-1]:
-                    print(', ', end='')
-                else:
-                    print('(=', end='')
-            print(number, end='')
-
-        if  cur_level > 0:
-            print(')' * cur_level, end='')
-        print()
+        if lhs is None:
+            lhs = num
+        else:
+            if rhs is None:
+                rhs = num
+                temp = add(lhs, rhs)
+                print(f"  {lhs}")
+                print(f"+ {rhs}")
+                print(f"= {temp}")
+                lhs = temp
+                rhs = None
 
 
 
