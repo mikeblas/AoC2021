@@ -50,10 +50,9 @@ class XNode:
         return 3 * lhs + 2 * rhs
 
 
-
-
 def add(lhs, rhs):
     result = XNode(rhs, lhs)
+    result.explode(1)
     return result
 
 
