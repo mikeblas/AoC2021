@@ -16,35 +16,35 @@ def get_scanner_points(input_lines):
     return scanner_points
 
 
-# returns sorted coordinate diffs as list[coord][station_id]
+# returns diffs of sorted coordinates as list[axis][station_id]
 def find_diffs(scanner_points):
 
     all_diffs = []
 
     for axis in range(0,3):
-        x_diffs = []
+        diffs = []
         for index in range(0, len(scanner_points)):
             temp_n_x = [point[axis] for point in scanner_points[index]]
             temp_n_x.sort()
             this_row = []
             for point_index in range(1, len(temp_n_x)):
-                dx = abs(temp_n_x[point_index-1] - temp_n_x[point_index])
+                dx = temp_n_x[point_index-1] - temp_n_x[point_index]
                 this_row.append(dx)
-            x_diffs.append(this_row)
+            diffs.append(this_row)
 
-        all_diffs.append(x_diffs)
+        all_diffs.append(diffs)
 
     return all_diffs
 
 
-def compare_out(all_diffs, axis1, axis2):
+def compare_out(all_diffs, axis1, axis2, factors):
     # compare all diff lists on this axis to see who has many in common
     for outer_index in range(0, len(all_diffs[axis1])-1):
-        outer_set = set(all_diffs[axis1][outer_index])
+        outer_set = set([n * factors[0] for n in all_diffs[axis1][outer_index]])
         for inner_index in range(outer_index+1, len(all_diffs[axis2])):
-            r = outer_set.intersection(all_diffs[axis2][inner_index])
+            r = outer_set.intersection([n * factors[1] for n in all_diffs[axis2][inner_index]])
             if len(r) >= 12:
-                print(f"{axis1}, {outer_index} -> {axis2}, {inner_index}: {len(r):4} {r}")
+                print(f"{axis1}, {outer_index}, {factors[0]} -> {axis2}, {inner_index}, {factors[1]}: {len(r):4} {r}")
 
     # all_diffs[axis1][2].sort()
     # all_diffs[axis2][20].sort()
@@ -68,11 +68,32 @@ def main():
     for axis in range(0, 3):
         print(f"{len(all_diffs[axis])} diffs computed on axis {axis}")
 
-    pprint.pprint(all_diffs, compact=True, width=132)
+    pprint.pprint(all_diffs, compact=True, width=160)
+
+    all3_factors = [
+        [-1, -1, -1],
+        [-1, -1,  1],
+        [-1,  1, -1],
+        [-1,  1,  1],
+        [ 1, -1, -1],
+        [ 1, -1,  1],
+        [ 1,  1, -1],
+        [ 1,  1,  1]
+    ]
+
+    all2_factors = [
+        [-1, -1],
+        [-1,  1],
+        [ 1, -1],
+        [ 1,  1],
+    ]
+
+    identity_factors = [ [ 1, 1 ] ]
 
     for axis1 in range(0, 3):
         for axis2 in range(0, 3):
-            compare_out(all_diffs, axis1, axis2)
+            for factor in identity_factors:
+                compare_out(all_diffs, axis1, axis2, factor)
     # print(x_diffs)
 
 
