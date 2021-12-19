@@ -16,29 +16,40 @@ def get_scanner_points(input_lines):
     return scanner_points
 
 
-def find_diffs(scanner_points, coord):
-    x_diffs = []
-    for index in range(0, len(scanner_points)):
-        temp_n_x = [point[coord] for point in scanner_points[index]]
-        temp_n_x.sort()
-        this_row = []
-        for point_index in range(1, len(temp_n_x)):
-            dx = abs(temp_n_x[point_index-1] - temp_n_x[point_index])
-            this_row.append(abs(dx))
-        x_diffs.append(this_row)
+# returns sorted coordinate diffs as list[coord][station_id]
+def find_diffs(scanner_points):
 
-    # compare all diff lists on this axis to see who has many in
-    for x in range(0, len(x_diffs)-1):
-        x_set = set(x_diffs[x])
-        for y in range(x+1, len(x_diffs)):
-            r = x_set.intersection(x_diffs[y])
+    all_diffs = []
+
+    for axis in range(0,3):
+        x_diffs = []
+        for index in range(0, len(scanner_points)):
+            temp_n_x = [point[axis] for point in scanner_points[index]]
+            temp_n_x.sort()
+            this_row = []
+            for point_index in range(1, len(temp_n_x)):
+                dx = abs(temp_n_x[point_index-1] - temp_n_x[point_index])
+                this_row.append(dx)
+            x_diffs.append(this_row)
+
+        all_diffs.append(x_diffs)
+
+    return all_diffs
+
+
+def compare_out(all_diffs, axis1, axis2):
+    # compare all diff lists on this axis to see who has many in common
+    for outer_index in range(0, len(all_diffs[axis1])-1):
+        outer_set = set(all_diffs[axis1][outer_index])
+        for inner_index in range(outer_index+1, len(all_diffs[axis2])):
+            r = outer_set.intersection(all_diffs[axis2][inner_index])
             if len(r) >= 12:
-                print(f"{x} -> {y}: {len(r):4} {r}")
+                print(f"{axis1}, {outer_index} -> {axis2}, {inner_index}: {len(r):4} {r}")
 
-    x_diffs[2].sort()
-    x_diffs[20].sort()
-    print(f"reference  2, {coord}: {x_diffs[2]}")
-    print(f"reference 20, {coord}: {x_diffs[20]}")
+    # all_diffs[axis1][2].sort()
+    # all_diffs[axis2][20].sort()
+    # print(f"station  2, axis {axis1}: {all_diffs[axis1][2]}")
+    # print(f"station 20, axis {axis2}: {all_diffs[axis2][20]}")
 
 
 def main():
@@ -48,22 +59,23 @@ def main():
     line_count = len(input_lines)
     print(f"{line_count} lines read")
 
+    # read scanner all points
     scanner_points = get_scanner_points(input_lines)
-    pprint.pprint(scanner_points[0])
+    print(f"{len(scanner_points)} scanners read")
+    # pprint.pprint(scanner_points[0])
 
-    print("0")
-    find_diffs(scanner_points, 0)
+    all_diffs = find_diffs(scanner_points)
+    for axis in range(0, 3):
+        print(f"{len(all_diffs[axis])} diffs computed on axis {axis}")
 
-    print("\n1")
-    find_diffs(scanner_points, 1)
+    pprint.pprint(all_diffs, compact=True, width=132)
 
-
-    print("\n2")
-    find_diffs(scanner_points, 2)
-
-
+    for axis1 in range(0, 3):
+        for axis2 in range(0, 3):
+            compare_out(all_diffs, axis1, axis2)
     # print(x_diffs)
 
 
 if __name__ == '__main__':
     main()
+
