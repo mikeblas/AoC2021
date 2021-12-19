@@ -27,12 +27,18 @@ def find_diffs(scanner_points, coord):
             this_row.append(abs(dx))
         x_diffs.append(this_row)
 
+    # compare all diff lists on this axis to see who has many in
     for x in range(0, len(x_diffs)-1):
         x_set = set(x_diffs[x])
         for y in range(x+1, len(x_diffs)):
             r = x_set.intersection(x_diffs[y])
             if len(r) >= 12:
                 print(f"{x} -> {y}: {len(r):4} {r}")
+
+    x_diffs[2].sort()
+    x_diffs[20].sort()
+    print(f"reference  2, {coord}: {x_diffs[2]}")
+    print(f"reference 20, {coord}: {x_diffs[20]}")
 
 
 def main():
