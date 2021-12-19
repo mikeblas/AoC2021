@@ -2,62 +2,46 @@ import sys
 
 
 class XNode:
-    def __init__(self, b, a):
-        if type(a) == int:
-            self.left_int = a
-            self.left_child = None
-        else:
-            self.left_int = None
-            self.left_child = a
-
-        if type(b) == int:
-            self.right_int = b
-            self.right_child = None
-        else:
-            self.right_int = None
-            self.right_child = b
+    def __init__(self, b, a, value, depth):
+        self.left = a
+        self.right = b
+        self.value = value
+        self.parent = None
+        self.depth = depth
 
     def __repr__(self):
-        lhs = f"{self.left_int}" if self.left_int is not None else f"{self.left_child}"
-        rhs = f"{self.right_int}" if self.right_int is not None else f"{self.right_child}"
-        return f"({lhs}, {rhs})"
+        if self.value is not None:
+            return f"{self.value}"
+        else:
+            lhs = f"{self.left}"
+            rhs = f"{self.right}"
+            return f"({lhs}, {rhs})"
 
     def traverse(self, level):
-
-        if self.left_int is not None:
-            print(f"{' ' * level}: {self.left_int}")
+        if self.value is not None:
+            print(f"{' ' * level}({self.depth}): {self.value}")
         else:
-            self.left_child.traverse(level+1)
-
-        if self.right_int is not None:
-            print(f"{' ' * level}: {self.right_int}")
-        else:
-            self.right_child.traverse(level+1)
-
+            self.left.traverse(level + 1)
+            self.right.traverse(level + 1)
 
     def magnitude(self):
+        if self.value is not None:
+            return self.value
+        return 3 * self.left.magnitude() + 2 * self.right.magnitude()
 
-        if self.left_int is not None:
-            lhs = self.left_int
-        else:
-            lhs = self.left_child.magnitude()
+    def explode(self, level, previous_int, coming_right):
 
-        if self.right_int is not None:
-            rhs = self.right_int
-        else:
-            rhs = self.right_child.magnitude()
-
-        return 3 * lhs + 2 * rhs
+        return
 
 
 def add(lhs, rhs):
     result = XNode(rhs, lhs)
-    result.explode(1)
+    result.explode(1, None, None)
     return result
 
 
 def main():
-    with open('sample.txt') as my_file:
+    with open('explode1.txt') as my_file:
         input_lines = my_file.readlines()
     input_lines = [s.strip() for s in input_lines]
     line_count = len(input_lines)
@@ -69,18 +53,26 @@ def main():
 
     for s in input_lines:
         stak = []
+        depth = 0
         for ch in s:
-            if ch >= '0' and ch <= '9':
-                stak.append(int(ch))
+            if ch == '[':
+                depth += 1
+            elif '0' <= ch <= '9':
+                stak.append(XNode(None, None, int(ch), depth))
             elif ch == ',':
                 continue
             elif ch == ']':
                 xa = stak.pop()
                 xb = stak.pop()
-                x = XNode(xa, xb)
+                depth -= 1
+                x = XNode(xa, xb, None, depth)
+                xa.parent = x
+                xb.parent = x
                 stak.append(x)
 
         num = stak[0]
+        print(f"num = {num}")
+        num.explode(1, None, None)
         print(f"num = {num}")
         print(f"magnitude = {num.magnitude()}")
 
@@ -97,8 +89,6 @@ def main():
                 print(f"= {temp}")
                 lhs = temp
                 rhs = None
-
-
 
 
 
