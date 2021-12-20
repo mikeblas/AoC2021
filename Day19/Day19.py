@@ -195,7 +195,10 @@ def place_station(scanner_points, known_stations, station):
     # for each rotation ...
     for rotation_idx in range(len(rotations)):
 
-        for known_station in known_stations:
+        for known_station, known_station_info in known_stations.items():
+            # print(f"{station} against {known_station_info}")
+            known_station_origin = known_station_info[0]
+            known_station_rotation = known_station_info[1]
 
             # build an offset from station[0] point[0] to each point
             # in the target station, and see if anything else lines up ...
@@ -204,15 +207,22 @@ def place_station(scanner_points, known_stations, station):
                 candidate_delta = get_delta(scanner_points[known_station][0], rotated_target)
 
                 matches = 0
+                matched = []
                 for test_idx, test_point in enumerate(scanner_points[station]):
                     rotated_test = rotate_point(test_point, rotations[rotation_idx])
                     result = add_delta(rotated_test, candidate_delta)
 
-                    for rematch_point in scanner_points[known_station]:
-                        if rematch_point == result:
+                    for rematch_idx, rematch_point in enumerate(scanner_points[known_station]):
+                        temp = rotate_point(rematch_point, rotations[known_station_rotation])
+                        temp = add_delta(temp, known_station_origin)
+                        if station == 0 and known_station == 15:
+                            print(f"{temp} == {result}")
+                        if temp == result:
                             matches += 1
+                            matched.append((test_idx, rematch_idx, rematch_point, test_point, rotated_test))
                 if matches >= 12:
                     print(f"station = {station}, rotation_idx = {rotation_idx}, candidate_idx = {candidate_idx}, matches = {matches}")
+                    print(matched)
                     return station, rotation_idx, candidate_delta
 
     return None
@@ -240,14 +250,29 @@ def main():
     unknown_set = set([n for n in range(1, len(scanner_points))])
 
     while len(unknown_set) > 0:
+        matched_one = False
         for station in unknown_set:
             match_info = place_station(scanner_points, origins, station)
             if match_info is not None:
                 (match_station, match_rotation, match_delta) = match_info
                 print(match_info)
-                unknown_set.remove(match_station)
+                # unknown_set.remove(match_station)
                 origins[match_station] = (match_delta, match_rotation)
+                del origins[0]
+                unknown_set.add(0)
+
+                for point in scanner_points[match_station]:
+                    rotated_test = rotate_point(point, rotations[match_rotation])
+                    result = add_delta(rotated_test, match_delta)
+                    print(result)
+
+                matched_one = True
                 break
+
+        if not matched_one:
+            print("Failed to match")
+            break
+
 
 
 if __name__ == '__main__':
