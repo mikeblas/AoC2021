@@ -196,34 +196,34 @@ def place_station(scanner_points, known_stations, station):
     for rotation_idx in range(len(rotations)):
 
         for known_station, known_station_info in known_stations.items():
-            # print(f"{station} against {known_station_info}")
-            known_station_origin = known_station_info[0]
-            known_station_rotation = known_station_info[1]
+            if rotation_idx == 0:
+                print(f"working {known_station} on {station}")
 
-            # build an offset from station[0] point[0] to each point
-            # in the target station, and see if anything else lines up ...
-            for candidate_idx, candidate_point in enumerate(scanner_points[station]):
-                rotated_target = rotate_point(candidate_point, rotations[rotation_idx])
-                candidate_delta = get_delta(scanner_points[known_station][0], rotated_target)
+            for known_rotate_point_idx in range(len(scanner_points[known_station])):
 
-                matches = 0
-                matched = []
-                for test_idx, test_point in enumerate(scanner_points[station]):
-                    rotated_test = rotate_point(test_point, rotations[rotation_idx])
-                    result = add_delta(rotated_test, candidate_delta)
+                # print(f"{station} against {known_station_info}")
+                known_station_origin = known_station_info[0]
+                known_station_rotation = known_station_info[1]
 
-                    for rematch_idx, rematch_point in enumerate(scanner_points[known_station]):
-                        temp = rotate_point(rematch_point, rotations[known_station_rotation])
-                        temp = add_delta(temp, known_station_origin)
-                        if station == 0 and known_station == 15:
-                            print(f"{temp} == {result}")
-                        if temp == result:
-                            matches += 1
-                            matched.append((test_idx, rematch_idx, rematch_point, test_point, rotated_test))
-                if matches >= 12:
-                    print(f"station = {station}, rotation_idx = {rotation_idx}, candidate_idx = {candidate_idx}, matches = {matches}")
-                    print(matched)
-                    return station, rotation_idx, candidate_delta
+                # build an offset from station[0] point[0] to each point
+                # in the target station, and see if anything else lines up ...
+                for candidate_idx, candidate_point in enumerate(scanner_points[station]):
+                    rotated_target = rotate_point(candidate_point, rotations[rotation_idx])
+                    candidate_delta = get_delta(scanner_points[known_station][known_rotate_point_idx], rotated_target)
+
+                    matches = 0
+                    for test_idx, test_point in enumerate(scanner_points[station]):
+                        rotated_test = rotate_point(test_point, rotations[rotation_idx])
+                        result = add_delta(rotated_test, candidate_delta)
+
+                        for rematch_idx, rematch_point in enumerate(scanner_points[known_station]):
+                            temp = rotate_point(rematch_point, rotations[known_station_rotation])
+                            # temp = add_delta(temp, known_station_origin)
+                            if temp == result:
+                                matches += 1
+                    if matches >= 12:
+                        print(f"station = {station}, rotation_idx = {rotation_idx}, candidate_idx = {candidate_idx}, matches = {matches}")
+                        return station, rotation_idx, candidate_delta
 
     return None
 
