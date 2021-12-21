@@ -79,16 +79,16 @@ def main():
 
     input_image = image_data
     blank_default = 0
-    (output_image, blank_default) = process_image(decoder, input_image, 0)
+    iteration = 0
+    while iteration < 50:
+        (output_image, blank_default) = process_image(decoder, input_image, blank_default)
+
+        iteration += 1
+        print(f"{iteration}: {blank_default}, {count_ones(output_image)}")
+        input_image = output_image
+
     for y in output_image:
         print("".join(y))
-    print(f"{blank_default}, {count_ones(output_image)}")
-
-    (output_image, blank_default) = process_image(decoder, output_image, blank_default)
-    for y in output_image:
-        print("".join(y))
-    print(f"{blank_default}, {count_ones(output_image)}")
-
 
 if __name__ == '__main__':
     main()
