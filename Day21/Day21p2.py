@@ -1,88 +1,106 @@
 import pprint
 
+# 27 possible rolls when rolling 3d3
+# key == roll total, value == probability/27
+roll_curve = {
+    3: 1,
+    4: 3,
+    5: 6,
+    6: 7,
+    7: 6,
+    8: 3,
+    9: 1
+}
+
+
+# True if there are any active (un-won) games
+def any_active(universes):
+    for k, v in universes.items():
+        if k[1] < 21 and k[3] < 21:
+            return True
+    return False
+
+
 def main():
 
-    p1_pos = 10
+    p1_pos = 6
     p2_pos = 9
-    p1_score = 0
-    p2_score = 0
-    p1_win_sets = 0
-    p2_win_sets = 0
 
     # histogram of universes
-    # roll total key --> (position, score, count)
-    p1_universes = { 0: (p1_pos, p1_score, 1) }
-    p2_universes = { 0: (p2_pos, p2_score, 1) }
-
+    # game state key --> count of universes
+    # game state key: p1 position, p1 score; p2 position, p2 score
+    # at the start, only one game exists and it is in the initial state
+    universes = { (p1_pos, 0, p2_pos, 0): 1 }
 
     iteration = 0
-    while iteration < 2:
+    while True:
 
         # play player 1
-        # three rolls of 3 make a result in [3..9]
-        # which is 7 possible outcomes
-        p1_new_universes = {}
-        for k, v in p1_universes.items():
-            for distance in range(3,9+1):
-                new_k = k + distance
-
-                if new_k in p1_new_universes:
-                    p1_new_universes[new_k] = ( p1_new_universes[new_k][0],
-                                                p1_new_universes[new_k][1],
-                                                p1_new_universes[new_k][2] + 1 )
+        # update the universe for their rolls, skipping games already in win state
+        new_universes = {}
+        for k, v in universes.items():
+            # if someone won this, skip it
+            if k[1] >= 21 or k[3] >= 21:
+                if k in new_universes:
+                    new_universes[k] += v
                 else:
-                    temp_pos = ((v[0] + distance - 1) % 10) + 1
-                    temp_score = v[1] + temp_pos
-                    p1_new_universes[new_k] = ( temp_pos, temp_score, 1 )
+                    new_universes[k] = v
+            else:
+                for distance, prob in roll_curve.items():
+                    new_pos = ((k[0] + distance - 1) % 10) + 1
+                    new_score = k[1] + new_pos
+                    new_k = (new_pos, new_score, k[2], k[3])
+                    if new_k in new_universes:
+                        new_universes[new_k] += v * prob
+                    else:
+                        new_universes[new_k] = v * prob
 
-        p1_universes = p1_new_universes.copy()
+        # reset back
+        universes = new_universes.copy()
+        if not any_active(universes):
+            break
 
-        # check who wins
-
-        # multiply all p2 counts by 3^3
-        for k,v  in p1_universes.items():
-            p1_universes[k] = ( p1_universes[k][0],
-                                p1_universes[k][1],
-                                p1_universes[k][2] * 27 )
-
-        # play player 2
-
-        p2_new_universes = {}
-        for k, v in p2_universes.items():
-            for distance in range(3,9+1):
-                new_k = k + distance
-
-                if new_k in p2_new_universes:
-                    p2_new_universes[new_k] = ( p2_new_universes[new_k][0],
-                                                p2_new_universes[new_k][1],
-                                                p2_new_universes[new_k][2] + 1 )
+        # same for player 2
+        new_universes = {}
+        for k, v in universes.items():
+            # if someone won this, skip it
+            if k[1] >= 21 or k[3] >= 21:
+                if k in new_universes:
+                    new_universes[k] += v
                 else:
-                    temp_pos = ((v[0] + distance - 1) % 10) + 1
-                    temp_score = v[1] + temp_pos
-                    p2_new_universes[new_k] = ( temp_pos, temp_score, 1 )
+                    new_universes[k] = v
+            else:
+                for distance, prob in roll_curve.items():
+                    new_pos = ((k[2] + distance - 1) % 10) + 1
+                    new_score = k[3] + new_pos
+                    new_k = (k[0], k[1], new_pos, new_score)
+                    if new_k in new_universes:
+                        new_universes[new_k] += v * prob
+                    else:
+                        new_universes[new_k] = v * prob
 
-        p2_universes = p2_new_universes.copy()
-
-        # check winners
-
-        # multiply all p1 by 3**3
-        for k,v  in p1_universes.items():
-            p1_universes[k] = ( p1_universes[k][0],
-                                p1_universes[k][1],
-                                p1_universes[k][2] * 27 )
-
-
-
-
-
+        universes = new_universes.copy()
+        if not any_active(universes):
+            break
         iteration += 1
 
-    print("=== p1 universes")
-    pprint.pprint(p1_universes)
-    print("\n=== p2 universes")
-    pprint.pprint(p2_universes)
+    print(f"iterations: {iteration}")
+    print(len(universes))
+    # pprint.pprint(universes)
 
+    # 116555242726181794 too high
+    p1_win_sets = 0
+    p2_win_sets = 0
+    for k, v in universes.items():
+        if k[1] >= 21:
+            p1_win_sets += v
+        if k[3] >= 21:
+            p2_win_sets += v
+        assert k[1] != k[3]
+        assert k[1] >= 21 or k[3] >= 21
 
+    print(f"p1_win_sets = {p1_win_sets}")
+    print(f"p2_win_sets = {p2_win_sets}")
 
 if __name__ == '__main__':
     main()
