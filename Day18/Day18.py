@@ -3,6 +3,7 @@ import sys
 
 class XNode:
     def __init__(self, b, a, value, depth):
+        print(f"init: {b}, {a}, {value}, {depth}")
         self.left = a
         self.right = b
         self.value = value
@@ -18,6 +19,17 @@ class XNode:
             return f"({lhs}, {rhs})"
 
     def traverse(self, level):
+
+        if self.value is None:
+            self.left.traverse(level + 1)
+
+        if self.value is not None:
+            print(f"{' ' * level}({self.depth}): {self.value}")
+
+        if self.value is None:
+            self.right.traverse(level + 1)
+
+    def traverse2(self, level):
         if self.value is not None:
             print(f"{' ' * level}({self.depth}): {self.value}")
         else:
@@ -62,6 +74,43 @@ def add(lhs, rhs):
     return result
 
 
+def sum_all(input_numbers):
+    lhs = None
+    rhs = None
+
+    for num in input_numbers:
+
+        if lhs is None:
+            lhs = num
+        else:
+            if rhs is None:
+                rhs = num
+                temp = add(lhs, rhs)
+                print(f"  {lhs}")
+                print(f"+ {rhs}")
+                print(f"= {temp}")
+                lhs = temp
+                rhs = None
+
+
+def dump_all(input_numbers):
+
+    for num in input_numbers:
+        print(f"num = {num}")
+        print(f"magnitude = {num.magnitude()}")
+        num.traverse(0)
+        print(f"-----")
+
+
+def explode_all(input_numbers):
+
+    for num in input_numbers:
+        print(f"before: {num}")
+        num.explode(1, None, None)
+        print(f"after: {num}")
+        print(f"-----")
+
+
 def main():
     with open('explode1.txt') as my_file:
         input_lines = my_file.readlines()
@@ -69,9 +118,7 @@ def main():
     line_count = len(input_lines)
     print(f"{line_count} lines read")
 
-
-    lhs = None
-    rhs = None
+    input_numbers = []
 
     for s in input_lines:
         stak = []
@@ -92,27 +139,14 @@ def main():
                 xb.parent = x
                 stak.append(x)
 
+        input_numbers.append(stak[0])
         num = stak[0]
-        print(f"num = {num}")
-        num.explode(1, None, None)
-        print(f"num = {num}")
-        print(f"magnitude = {num.magnitude()}")
 
-        num.traverse(0)
-        num.explode(0, None, None)
+    dump_all(input_numbers)
 
-        if lhs is None:
-            lhs = num
-        else:
-            if rhs is None:
-                rhs = num
-                temp = add(lhs, rhs)
-                print(f"  {lhs}")
-                print(f"+ {rhs}")
-                print(f"= {temp}")
-                lhs = temp
-                rhs = None
+    # explode_all(input_numbers)
 
+    # sum_all(input_numbers)
 
 
 
