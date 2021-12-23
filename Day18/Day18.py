@@ -31,6 +31,28 @@ class XNode:
 
     def explode(self, level, previous_int, coming_right):
 
+        if level == 5:
+            print(f"Level 5: {self.value}, previous is {previous_int}, parent is {self.parent}")
+
+
+            # find next number
+            walker = self.parent.parent
+
+
+
+            # finally, remove ourselves from the tree
+            if self.parent.left == self:
+                self.parent.left = 0
+            else:
+                self.parent.right = 0
+
+
+        if self.left is not None:
+            self.left.explode(level + 1, previous_int, coming_right)
+
+        if self.right is not None:
+            self.right.explode(level + 1, previous_int, coming_right)
+
         return
 
 
@@ -77,6 +99,7 @@ def main():
         print(f"magnitude = {num.magnitude()}")
 
         num.traverse(0)
+        num.explode(0, None, None)
 
         if lhs is None:
             lhs = num
