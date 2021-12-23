@@ -50,7 +50,11 @@ class XNode:
             if coming_right is not None:
                 print(f"adding {coming_right.value} to {self.value}")
                 self.value += coming_right.value
+                coming_right.parent.value = 0
+                coming_right.parent.left = None
+                coming_right.parent.right = None
                 coming_right = None
+
             if self.depth == 5:
                 if self.parent.left == self:
                     print("LLL: ", end='')
@@ -66,6 +70,12 @@ class XNode:
         if self.value is None:
             previous_int, coming_right = self.right.explode(level + 1, previous_int, coming_right)
 
+        if level == 1 and coming_right is not None:
+            print(f"exiting {level} with coming_right == {coming_right}")
+            coming_right.parent.value = 0
+            coming_right.parent.left = None
+            coming_right.parent.right = None
+            coming_right = None
         return previous_int, coming_right
 
 
