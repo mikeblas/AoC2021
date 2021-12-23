@@ -3,7 +3,7 @@ import sys
 
 class XNode:
     def __init__(self, b, a, value, depth):
-        print(f"init: {b}, {a}, {value}, {depth}")
+        # print(f"init: {b}, {a}, {value}, {depth}")
         self.left = a
         self.right = b
         self.value = value
@@ -43,29 +43,30 @@ class XNode:
 
     def explode(self, level, previous_int, coming_right):
 
-        if level == 5:
-            print(f"Level 5: {self.value}, previous is {previous_int}, parent is {self.parent}")
+        if self.value is None:
+            previous_int, coming_right = self.left.explode(level + 1, previous_int, coming_right)
 
+        if self.value is not None:
+            if coming_right is not None:
+                print(f"adding {coming_right.value} to {self.value}")
+                self.value += coming_right.value
+                coming_right = None
+            if self.depth == 5:
+                if self.parent.left == self:
+                    print("LLL: ", end='')
+                    if previous_int is not None:
+                        previous_int.value += self.value
+                        previous_int = None
+                elif self.parent.right == self:
+                    print("RRR: ", end='')
+                    coming_right = self
+            print(f"{' ' * level}({self.depth}, prev={previous_int}, coming={coming_right}): {self.value}")
+            return self, coming_right
 
-            # find next number
-            walker = self.parent.parent
+        if self.value is None:
+            previous_int, coming_right = self.right.explode(level + 1, previous_int, coming_right)
 
-
-
-            # finally, remove ourselves from the tree
-            if self.parent.left == self:
-                self.parent.left = 0
-            else:
-                self.parent.right = 0
-
-
-        if self.left is not None:
-            self.left.explode(level + 1, previous_int, coming_right)
-
-        if self.right is not None:
-            self.right.explode(level + 1, previous_int, coming_right)
-
-        return
+        return previous_int, coming_right
 
 
 def add(lhs, rhs):
@@ -144,7 +145,8 @@ def main():
 
     dump_all(input_numbers)
 
-    # explode_all(input_numbers)
+    print("--- exploding!")
+    explode_all(input_numbers)
 
     # sum_all(input_numbers)
 
