@@ -41,47 +41,57 @@ class XNode:
             return self.value
         return 3 * self.left.magnitude() + 2 * self.right.magnitude()
 
-    def explode(self, level, previous_int, coming_right):
+    def explode(self):
+        exploded, x, y = self.explode_impl(1, None, None)
+        return exploded
 
+    def explode_impl(self, level, previous_int, coming_right):
         if self.value is None:
-            previous_int, coming_right = self.left.explode(level + 1, previous_int, coming_right)
+            exploded, previous_int, coming_right = self.left.explode_impl(level + 1, previous_int, coming_right)
+            if exploded:
+                return True, None, None
 
         if self.value is not None:
             if coming_right is not None:
-                print(f"adding {coming_right.value} to {self.value}")
+                # print(f"adding {coming_right.value} to {self.value}")
                 self.value += coming_right.value
                 coming_right.parent.value = 0
                 coming_right.parent.left = None
                 coming_right.parent.right = None
                 coming_right = None
+                return True, None, None
 
             if self.depth == 5:
                 if self.parent.left == self:
-                    print("LLL: ", end='')
+                    # print("LLL: ", end='')
                     if previous_int is not None:
                         previous_int.value += self.value
                         previous_int = None
                 elif self.parent.right == self:
-                    print("RRR: ", end='')
+                    # print("RRR: ", end='')
                     coming_right = self
-            print(f"{' ' * level}({self.depth}, prev={previous_int}, coming={coming_right}): {self.value}")
-            return self, coming_right
+            # print(f"{' ' * level}({self.depth}, prev={previous_int}, coming={coming_right}): {self.value}")
+            return False, self, coming_right
 
         if self.value is None:
-            previous_int, coming_right = self.right.explode(level + 1, previous_int, coming_right)
+            exploded, previous_int, coming_right = self.right.explode_impl(level + 1, previous_int, coming_right)
+            if exploded:
+                return True, None, None
 
         if level == 1 and coming_right is not None:
-            print(f"exiting {level} with coming_right == {coming_right}")
+            # print(f"exiting {level} with coming_right == {coming_right}")
             coming_right.parent.value = 0
             coming_right.parent.left = None
             coming_right.parent.right = None
             coming_right = None
-        return previous_int, coming_right
+            return True, None, None
+
+        return False, previous_int, coming_right
 
 
 def add(lhs, rhs):
     result = XNode(rhs, lhs)
-    result.explode(1, None, None)
+    result.explode_impl(1, None, None)
     return result
 
 
@@ -117,8 +127,8 @@ def explode_all(input_numbers):
 
     for num in input_numbers:
         print(f"before: {num}")
-        num.explode(1, None, None)
-        print(f"after: {num}")
+        ret = num.explode()
+        print(f"after: {ret} gave {num}")
         print(f"-----")
 
 
