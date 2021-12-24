@@ -24,16 +24,9 @@ class XNode:
             self.left.traverse(level + 1)
 
         if self.value is not None:
-            print(f"{' ' * level}({self.depth}): {self.value}")
+            print(f"{' ' * level}({self.depth}): {self.value}; parent = {self.parent}")
 
         if self.value is None:
-            self.right.traverse(level + 1)
-
-    def traverse2(self, level):
-        if self.value is not None:
-            print(f"{' ' * level}({self.depth}): {self.value}")
-        else:
-            self.left.traverse(level + 1)
             self.right.traverse(level + 1)
 
     def magnitude(self):
@@ -88,10 +81,56 @@ class XNode:
 
         return False, previous_int, coming_right
 
+    def split(self):
+        return self.split_impl(0)
+
+    def split_impl(self, level):
+        if self.value is None:
+            ret = self.left.split_impl(level + 1)
+            if ret:
+                return ret
+
+        if self.value is not None:
+            if self.value >= 10:
+                self.left = XNode(None, None, int(self.value / 2), self.depth + 1)
+                self.left.parent = self
+                self.right = XNode(None, None, int((self.value+1) / 2), self.depth + 1)
+                self.right.parent = self
+                self.value = None
+                return True
+            return False
+
+        if self.value is None:
+            ret = self.right.split_impl(level + 1)
+            if ret:
+                return ret
+
+        return False
+
+    def adjust_depth(self, delta):
+        if self.value is None:
+            self.left.adjust_depth(delta)
+
+        self.depth += delta
+
+        if self.value is None:
+            self.right.adjust_depth(delta)
+
 
 def add(lhs, rhs):
-    result = XNode(rhs, lhs)
-    result.explode_impl(1, None, None)
+    result = XNode(rhs, lhs, None, 0)
+    rhs.adjust_depth(1)
+    lhs.adjust_depth(1)
+
+    while True:
+        # print(result)
+        if result.explode():
+            # print("exploded")
+            continue
+        if result.split():
+            # print("split")
+            continue
+        break
     return result
 
 
@@ -110,6 +149,12 @@ def sum_all(input_numbers):
                 print(f"  {lhs}")
                 print(f"+ {rhs}")
                 print(f"= {temp}")
+                # print("lhs:")
+                # lhs.traverse(0)
+                # print("rhs:")
+                # rhs.traverse(0)
+                # print("temp:")
+                temp.traverse(0)
                 lhs = temp
                 rhs = None
 
@@ -133,7 +178,7 @@ def explode_all(input_numbers):
 
 
 def main():
-    with open('explode1.txt') as my_file:
+    with open('input.txt') as my_file:
         input_lines = my_file.readlines()
     input_lines = [s.strip() for s in input_lines]
     line_count = len(input_lines)
@@ -163,12 +208,12 @@ def main():
         input_numbers.append(stak[0])
         num = stak[0]
 
-    dump_all(input_numbers)
+    # dump_all(input_numbers)
 
-    print("--- exploding!")
-    explode_all(input_numbers)
+    # print("--- exploding!")
+    # explode_all(input_numbers)
 
-    # sum_all(input_numbers)
+    sum_all(input_numbers)
 
 
 
