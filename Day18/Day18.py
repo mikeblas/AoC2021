@@ -131,7 +131,6 @@ def add(lhs, rhs):
     rh.parent = result
     lh.parent = result
 
-
     while True:
         # print(result)
         if result.explode():
@@ -166,7 +165,7 @@ def sum_all(input_numbers):
             lhs = temp
             rhs = None
 
-    print(f"final magnitude is {temp.magnitude()}")
+    return temp.magnitude()
 
 
 def dump_all(input_numbers):
@@ -223,8 +222,22 @@ def main():
     # print("--- exploding!")
     # explode_all(input_numbers)
 
-    sum_all(input_numbers)
+    result = sum_all(input_numbers)
+    print(f"magnitude of total sum is {result}")
 
+    max_found = None
+    for outer_idx, outer in enumerate(input_numbers):
+        for inner_idx, inner in enumerate(input_numbers):
+
+            if inner_idx == outer_idx:
+                continue
+
+            result = add(outer, inner)
+            result_magnitude = result.magnitude()
+            if max_found is None or max_found < result_magnitude:
+                max_found = result_magnitude
+
+    print(f"best magnitude is {max_found}")
 
 
 if __name__ == '__main__':
