@@ -1,4 +1,3 @@
-import sys
 import copy
 
 class XNode:
@@ -144,12 +143,15 @@ def add(lhs, rhs):
 
 
 def sum_all(input_numbers):
-    lhs = None
 
+    temp = None
+
+    lhs = None
     for num in input_numbers:
 
         if lhs is None:
             lhs = num
+            temp = lhs
         else:
             rhs = num
             temp = add(lhs, rhs)
@@ -165,7 +167,10 @@ def sum_all(input_numbers):
             lhs = temp
             rhs = None
 
-    return temp.magnitude()
+    if temp is None:
+        return None
+    else:
+        return temp.magnitude()
 
 
 def dump_all(input_numbers):
