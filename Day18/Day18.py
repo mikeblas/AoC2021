@@ -1,5 +1,5 @@
 import sys
-
+import copy
 
 class XNode:
     def __init__(self, b, a, value, depth):
@@ -19,7 +19,7 @@ class XNode:
             return f"({lhs}, {rhs})"
 
     def traverse(self, level):
-
+        assert level == self.depth, f"{level=} == {self.depth=}"
         if self.value is None:
             self.left.traverse(level + 1)
 
@@ -118,9 +118,19 @@ class XNode:
 
 
 def add(lhs, rhs):
-    result = XNode(rhs, lhs, None, 0)
-    rhs.adjust_depth(1)
-    lhs.adjust_depth(1)
+    lh = copy.deepcopy(lhs)
+    rh = copy.deepcopy(rhs)
+    rh.adjust_depth(1)
+    lh.adjust_depth(1)
+    # print(f"\nadd lhs:")
+    # lhs.traverse(0)
+    # print(f"add rhs:")
+    # rhs.traverse(0)
+
+    result = XNode(rh, lh, None, 0)
+    rh.parent = result
+    lh.parent = result
+
 
     while True:
         # print(result)
@@ -136,27 +146,27 @@ def add(lhs, rhs):
 
 def sum_all(input_numbers):
     lhs = None
-    rhs = None
 
     for num in input_numbers:
 
         if lhs is None:
             lhs = num
         else:
-            if rhs is None:
-                rhs = num
-                temp = add(lhs, rhs)
-                print(f"  {lhs}")
-                print(f"+ {rhs}")
-                print(f"= {temp}")
-                # print("lhs:")
-                # lhs.traverse(0)
-                # print("rhs:")
-                # rhs.traverse(0)
-                # print("temp:")
-                temp.traverse(0)
-                lhs = temp
-                rhs = None
+            rhs = num
+            temp = add(lhs, rhs)
+            # print(f"\n  {lhs}")
+            # print(f"+ {rhs}")
+            # print(f"= {temp}")
+            # print("lhs:")
+            # lhs.traverse(0)
+            # print("rhs:")
+            # rhs.traverse(0)
+            # print("temp:")
+            # temp.traverse(0)
+            lhs = temp
+            rhs = None
+
+    print(f"final magnitude is {temp.magnitude()}")
 
 
 def dump_all(input_numbers):
@@ -206,7 +216,7 @@ def main():
                 stak.append(x)
 
         input_numbers.append(stak[0])
-        num = stak[0]
+        # stak[0].traverse(0)
 
     # dump_all(input_numbers)
 
