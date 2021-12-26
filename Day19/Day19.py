@@ -35,6 +35,7 @@ rotations = [
 #  scanner_points[0][3] --> list of observations for station #0, rotated with idx #3
 #  scanner_points[0][0] --> list of observations for station #0, at identity rotation #0
 #  scanner_points[0]    --> dictionary of observations for station #0, with key == rotation_idx
+#  scanner_points[0][-1] -> if exists, is the matching rotation, also translated relative to station #0
 def get_scanner_points(input_lines):
     flat_scanner_points = []
     sensor_number = None
@@ -59,6 +60,9 @@ def get_scanner_points(input_lines):
 
             this_station[rotation_idx] = this_rotation
         scanner_points.append(this_station)
+
+    scanner_points[0][-1] = scanner_points[0][0]
+
     return scanner_points
 
 
@@ -109,34 +113,27 @@ def place_station(scanner_points, known_stations, station):
     for rotation_idx in range(len(rotations)):
 
         for known_station, known_station_info in known_stations.items():
-            if rotation_idx == 0:
-                print(f"working {known_station} on {station}")
 
             # print(f"{station} against {known_station_info}")
             known_station_origin = known_station_info[0]
             known_station_rotation = known_station_info[1]
 
-            for known_rotate_point_idx in range(len(scanner_points[known_station][known_station_rotation])):
+            for scanner_point in scanner_points[known_station][-1]:
 
                 # build an offset from station[0] point[0] to each point
                 # in the target station, and see if anything else lines up ...
                 for candidate_point in scanner_points[station][rotation_idx]:
-                    scanner_point = scanner_points[known_station][known_station_rotation][known_rotate_point_idx]
-                    scanner_point = add_delta(scanner_point, known_station_origin)
                     candidate_delta = get_delta(scanner_point, candidate_point)
 
                     matches = 0
                     check_list = []
-                    for test_idx, test_point in enumerate(scanner_points[station][rotation_idx]):
+                    for test_point in scanner_points[station][rotation_idx]:
                         result = add_delta(test_point, candidate_delta)
 
-                        for rematch_point in scanner_points[known_station][known_station_rotation]:
-                            temp = add_delta(rematch_point, known_station_origin)
-                            if temp == result:
-                                matches += 1
-                                check_list.append((rematch_point, test_point))
+                        if result in scanner_points[known_station][-1]:
+                            matches += 1
+                            check_list.append((result, test_point))
                     if matches >= 12:
-                        print(f"station = {station}, rotation_idx = {rotation_idx}, candidate = {candidate_point}, matches = {matches}")
                         # pprint.pprint(check_list)
                         return station, rotation_idx, candidate_delta
     return None
@@ -156,35 +153,40 @@ def main():
     print(f"points per scanner: {[len(row) for row in scanner_points]}")
 
     # origins of known scanners; we normalize to station #0
-    origins = { 0: ([0, 0, 0], 11) }
+    origins = { 0: ([0, 0, 0], 0) }
 
     # which stations are not known just yet?
     unknown_set = set([n for n in range(1, len(scanner_points))])
 
     while len(unknown_set) > 0:
         matched_one = False
+        print(f"{len(origins)} known stations ...", end='')
+
         for station in unknown_set:
             match_info = place_station(scanner_points, origins, station)
             if match_info is not None:
                 (match_station, match_rotation, match_delta) = match_info
-                print(match_info)
+                # print(match_info)
                 unknown_set.remove(match_station)
                 origins[match_station] = (match_delta, match_rotation)
-                print(f"match_station {match_station} = ({match_delta}, {match_rotation}")
-                # del origins[0]
-                # unknown_set.add(0)
+                print(f" station = {station}, rotation_idx = {match_rotation}, delta = {match_delta}")
 
+                offset_match = []
                 for point in scanner_points[match_station][match_rotation]:
                     result = add_delta(point, match_delta)
-                    print(result)
+                    offset_match.append(result)
+                    # print(result)
+                scanner_points[match_station][-1] = offset_match
 
                 matched_one = True
                 break
+            else:
+                print('.', end='')
 
         if not matched_one:
             print("Failed to match")
             break
-        break
+        # break
 
 
 
