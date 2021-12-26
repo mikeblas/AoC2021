@@ -120,7 +120,7 @@ def place_station(scanner_points, known_stations, station):
 
                 # build an offset from station[0] point[0] to each point
                 # in the target station, and see if anything else lines up ...
-                for candidate_idx, candidate_point in enumerate(scanner_points[station][rotation_idx]):
+                for candidate_point in scanner_points[station][rotation_idx]:
                     scanner_point = scanner_points[known_station][known_station_rotation][known_rotate_point_idx]
                     scanner_point = add_delta(scanner_point, known_station_origin)
                     candidate_delta = get_delta(scanner_point, candidate_point)
@@ -130,13 +130,13 @@ def place_station(scanner_points, known_stations, station):
                     for test_idx, test_point in enumerate(scanner_points[station][rotation_idx]):
                         result = add_delta(test_point, candidate_delta)
 
-                        for rematch_idx, rematch_point in enumerate(scanner_points[known_station][known_station_rotation]):
+                        for rematch_point in scanner_points[known_station][known_station_rotation]:
                             temp = add_delta(rematch_point, known_station_origin)
                             if temp == result:
                                 matches += 1
                                 check_list.append((rematch_point, test_point))
                     if matches >= 12:
-                        print(f"station = {station}, rotation_idx = {rotation_idx}, candidate_idx = {candidate_idx}, matches = {matches}")
+                        print(f"station = {station}, rotation_idx = {rotation_idx}, candidate = {candidate_point}, matches = {matches}")
                         # pprint.pprint(check_list)
                         return station, rotation_idx, candidate_delta
     return None
