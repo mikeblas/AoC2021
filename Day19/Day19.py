@@ -104,7 +104,7 @@ def get_opposite(point1):
 
 def place_station(scanner_points, known_stations, station):
 
-    # print(f"rotations = {len(rotations)}, scanner points = {len(scanner_points[station])}, match = {len(scanner_points[0])}")
+    # print(f"rotations = {len(rotations)}, scanner points = {len(scanner_points[station][0])}, match = {len(scanner_points[0][0])}")
     # for each rotation ...
     for rotation_idx in range(len(rotations)):
 
@@ -112,29 +112,26 @@ def place_station(scanner_points, known_stations, station):
             if rotation_idx == 0:
                 print(f"working {known_station} on {station}")
 
-            for known_rotate_point_idx in range(len(scanner_points[known_station][0])):
+            # print(f"{station} against {known_station_info}")
+            known_station_origin = known_station_info[0]
+            known_station_rotation = known_station_info[1]
 
-                # print(f"{station} against {known_station_info}")
-                known_station_origin = known_station_info[0]
-                known_station_rotation = known_station_info[1]
+            for known_rotate_point_idx in range(len(scanner_points[known_station][known_station_rotation])):
 
                 # build an offset from station[0] point[0] to each point
                 # in the target station, and see if anything else lines up ...
-                for candidate_idx, candidate_point in enumerate(scanner_points[station][0]):
-                    rotated_target = rotate_point(candidate_point, rotation_idx)
-                    scanner_point = rotate_point(scanner_points[known_station][0][known_rotate_point_idx], known_station_rotation)
+                for candidate_idx, candidate_point in enumerate(scanner_points[station][rotation_idx]):
+                    scanner_point = scanner_points[known_station][known_station_rotation][known_rotate_point_idx]
                     scanner_point = add_delta(scanner_point, known_station_origin)
-                    candidate_delta = get_delta(scanner_point, rotated_target)
+                    candidate_delta = get_delta(scanner_point, candidate_point)
 
                     matches = 0
                     check_list = []
-                    for test_idx, test_point in enumerate(scanner_points[station][0]):
-                        rotated_test = rotate_point(test_point, rotation_idx)
-                        result = add_delta(rotated_test, candidate_delta)
+                    for test_idx, test_point in enumerate(scanner_points[station][rotation_idx]):
+                        result = add_delta(test_point, candidate_delta)
 
-                        for rematch_idx, rematch_point in enumerate(scanner_points[known_station][0]):
-                            temp = rotate_point(rematch_point, known_station_rotation)
-                            temp = add_delta(temp, known_station_origin)
+                        for rematch_idx, rematch_point in enumerate(scanner_points[known_station][known_station_rotation]):
+                            temp = add_delta(rematch_point, known_station_origin)
                             if temp == result:
                                 matches += 1
                                 check_list.append((rematch_point, test_point))
@@ -177,9 +174,8 @@ def main():
                 # del origins[0]
                 # unknown_set.add(0)
 
-                for point in scanner_points[match_station][0]:
-                    rotated_test = rotate_point(point, match_rotation)
-                    result = add_delta(rotated_test, match_delta)
+                for point in scanner_points[match_station][match_rotation]:
+                    result = add_delta(point, match_delta)
                     print(result)
 
                 matched_one = True
