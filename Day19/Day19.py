@@ -187,6 +187,14 @@ def main():
             break
         # break
 
+    # now find the number of unique points
+    unique_coords = set()
+    for station in scanner_points:
+        for point in station[-1]:
+            unique_coords.add((point[0], point[1], point[2]))
+
+    print(f"there are {len(unique_coords)} unique points")
+
 
 if __name__ == '__main__':
     main()
