@@ -2,36 +2,8 @@ import math
 import pprint
 import sys
 
-all3_factors = [
-    [-1, -1, -1],
-    [-1, -1,  1],
-    [-1,  1, -1],
-    [-1,  1,  1],
-    [ 1, -1, -1],
-    [ 1, -1,  1],
-    [ 1,  1, -1],
-    [ 1,  1,  1]
-]
 
-all2_factors = [
-    [-1, -1],
-    [-1,  1],
-    [ 1, -1],
-    [ 1,  1],
-]
-
-three_rotations = [
-    [0, 1, 2],
-    [0, 2, 1],
-    [1, 0, 2],
-    [1, 2, 0],
-    [2, 1, 0],
-    [2, 0, 1]
-]
-
-identity_factors = [[1, 1]]
-
-rotations =[
+rotations = [
  [0, 2, 1, 1, 1, -1],
  [2, 0, 1, -1, 1, -1],
  [0, 2, 1, 1, -1, -1],
@@ -59,6 +31,7 @@ rotations =[
 ]
 
 
+# read the input file and return a list of lists of scanner observations
 def get_scanner_points(input_lines):
     scanner_points = []
     sensor_number = None
@@ -73,23 +46,18 @@ def get_scanner_points(input_lines):
     return scanner_points
 
 
-
-def distance3(first, second):
-    dx = first[0] - second[0]
-    dy = first[1] - second[1]
-    dz = first[2] - second[2]
-    return math.sqrt(dx*dx* + dy*dy + dz*dz)
-
-
-def rotate_point(point, rotation):
+# rotate a particular point by the translation at the given rotation_idx
+def rotate_point(point, rotation_idx):
+    rot = rotations[rotation_idx]
     ret = [
-        point[rotation[0]] * rotation[3],
-        point[rotation[1]] * rotation[4],
-        point[rotation[2]] * rotation[5]
+        point[rot[0]] * rot[3],
+        point[rot[1]] * rot[4],
+        point[rot[2]] * rot[5]
     ]
     return ret
 
 
+# find the difference between point1 and point2
 def get_delta(point1, point2):
     x = [
         point1[0] - point2[0],
@@ -99,6 +67,7 @@ def get_delta(point1, point2):
     return x
 
 
+# add point1 to point2
 def add_delta(point1, point2):
     x = [
         point1[0] + point2[0],
@@ -107,7 +76,7 @@ def add_delta(point1, point2):
     ]
     return x
 
-
+# invert the given point
 def get_opposite(point1):
     x = [
         -point1[0],
@@ -136,19 +105,19 @@ def place_station(scanner_points, known_stations, station):
                 # build an offset from station[0] point[0] to each point
                 # in the target station, and see if anything else lines up ...
                 for candidate_idx, candidate_point in enumerate(scanner_points[station]):
-                    rotated_target = rotate_point(candidate_point, rotations[rotation_idx])
-                    scanner_point = rotate_point(scanner_points[known_station][known_rotate_point_idx], rotations[known_station_rotation])
+                    rotated_target = rotate_point(candidate_point, rotation_idx)
+                    scanner_point = rotate_point(scanner_points[known_station][known_rotate_point_idx], known_station_rotation)
                     scanner_point = add_delta(scanner_point, known_station_origin)
                     candidate_delta = get_delta(scanner_point, rotated_target)
 
                     matches = 0
                     check_list = []
                     for test_idx, test_point in enumerate(scanner_points[station]):
-                        rotated_test = rotate_point(test_point, rotations[rotation_idx])
+                        rotated_test = rotate_point(test_point, rotation_idx)
                         result = add_delta(rotated_test, candidate_delta)
 
                         for rematch_idx, rematch_point in enumerate(scanner_points[known_station]):
-                            temp = rotate_point(rematch_point, rotations[known_station_rotation])
+                            temp = rotate_point(rematch_point, known_station_rotation)
                             temp = add_delta(temp, known_station_origin)
                             if temp == result:
                                 matches += 1
@@ -193,7 +162,7 @@ def main():
                 # unknown_set.add(0)
 
                 for point in scanner_points[match_station]:
-                    rotated_test = rotate_point(point, rotations[match_rotation])
+                    rotated_test = rotate_point(point, match_rotation)
                     result = add_delta(rotated_test, match_delta)
                     print(result)
 
