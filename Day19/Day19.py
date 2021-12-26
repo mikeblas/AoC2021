@@ -58,6 +58,7 @@ rotations =[
  [2, 1, 0, -1, -1, 1]
 ]
 
+
 def get_scanner_points(input_lines):
     scanner_points = []
     sensor_number = None
@@ -78,87 +79,6 @@ def distance3(first, second):
     dy = first[1] - second[1]
     dz = first[2] - second[2]
     return math.sqrt(dx*dx* + dy*dy + dz*dz)
-
-
-# returns diffs of sorted coordinates as list[axis][station_id]
-def find_diffs(scanner_points):
-
-    all_diffs = []
-
-    for axis in range(0,3):
-        diffs = []
-        for index in range(0, len(scanner_points)):
-            temp_n_x = [point[axis] for point in scanner_points[index]]
-            temp_n_x.sort()
-            this_row = []
-            for point_index in range(1, len(temp_n_x)):
-                dx = temp_n_x[point_index-1] - temp_n_x[point_index]
-                this_row.append(dx)
-            diffs.append(this_row)
-
-        all_diffs.append(diffs)
-
-    return all_diffs
-
-
-
-def find_diffs3(scanner_points):
-
-    all_diffs = []
-
-    for index in range(0, len(scanner_points)):
-        this_row = []
-        for p1_index in range(0, len(scanner_points[index])-1):
-            for p2_index in range(p1_index+1, len(scanner_points[index])):
-                dist = distance3(scanner_points[index][p1_index], scanner_points[index][p2_index])
-                this_row.append(dist)
-        all_diffs.append(this_row)
-
-    return all_diffs
-
-
-def compare_out(all_diffs, axis1, axis2, factors):
-    # compare all diff lists on this axis to see who has many in common
-    for outer_index in range(0, len(all_diffs[axis1])-1):
-        outer_set = set([n * factors[0] for n in all_diffs[axis1][outer_index]])
-        for inner_index in range(outer_index+1, len(all_diffs[axis2])):
-            r = outer_set.intersection([n * factors[1] for n in all_diffs[axis2][inner_index]])
-            if len(r) >= 12:
-                print(f"{axis1}, {outer_index}, {factors[0]} -> {axis2}, {inner_index}, {factors[1]}: {len(r):4} {r}")
-
-    # all_diffs[axis1][2].sort()
-    # all_diffs[axis2][20].sort()
-    # print(f"station  2, axis {axis1}: {all_diffs[axis1][2]}")
-    # print(f"station 20, axis {axis2}: {all_diffs[axis2][20]}")
-
-
-def compare_out3(all_diffs3):
-    for outer_index in range(0, len(all_diffs3)-1):
-        outer_set = set([n for n in all_diffs3[outer_index]])
-        for inner_index in range(outer_index+1, len(all_diffs3)):
-            r = outer_set.intersection([n for n in all_diffs3[inner_index]])
-            if len(r) >= 12:
-                print(f"{outer_index} -3> {inner_index}: {len(r):4} {r}")
-
-
-def method_2d(scanner_points):
-    all_diffs = find_diffs(scanner_points)
-    for axis in range(0, 3):
-        print(f"{len(all_diffs[axis])} diffs computed on axis {axis}")
-
-    pprint.pprint(all_diffs, compact=True, width=160)
-
-    for axis1 in range(0, 3):
-        for axis2 in range(0, 3):
-            for factor in identity_factors:
-                compare_out(all_diffs, axis1, axis2, factor)
-    # print(x_diffs)
-
-
-def method_3d(scanner_points):
-    all_diffs3 = find_diffs3(scanner_points)
-    pprint.pprint(all_diffs3, compact=True, width=160)
-    compare_out3(all_diffs3)
 
 
 def rotate_point(point, rotation):
@@ -251,10 +171,7 @@ def main():
     # read scanner all points
     scanner_points = get_scanner_points(input_lines)
     print(f"{len(scanner_points)} scanners read")
-    print(f"{[len(row) for row in scanner_points]}")
-
-    # method_2d(scanner_points)
-    # method_3d(scanner_points)
+    print(f"points per scanner: {[len(row) for row in scanner_points]}")
 
     # origins of known scanners; we normalize to station #0
     origins = { 0: ([0, 0, 0], 11) }
@@ -286,6 +203,7 @@ def main():
         if not matched_one:
             print("Failed to match")
             break
+        break
 
 
 
