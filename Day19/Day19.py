@@ -269,11 +269,11 @@ def main():
             if match_info is not None:
                 (match_station, match_rotation, match_delta) = match_info
                 print(match_info)
-                # unknown_set.remove(match_station)
+                unknown_set.remove(match_station)
                 origins[match_station] = (match_delta, match_rotation)
                 print(f"match_station {match_station} = ({match_delta}, {match_rotation}")
-                del origins[0]
-                unknown_set.add(0)
+                # del origins[0]
+                # unknown_set.add(0)
 
                 for point in scanner_points[match_station]:
                     rotated_test = rotate_point(point, rotations[match_rotation])
