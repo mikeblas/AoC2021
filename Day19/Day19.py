@@ -4,6 +4,7 @@ import sys
 
 
 rotations = [
+ [0, 1, 2, 1, 1, 1],
  [0, 2, 1, 1, 1, -1],
  [2, 0, 1, -1, 1, -1],
  [0, 2, 1, 1, -1, -1],
@@ -15,7 +16,6 @@ rotations = [
  [1, 0, 2, -1, 1, 1],
  [0, 1, 2, 1, -1, 1],
  [1, 0, 2, 1, 1, 1],
- [0, 1, 2, 1, 1, 1],
  [2, 0, 1, -1, 1, 1],
  [0, 2, 1, 1, -1, 1],
  [2, 0, 1, 1, 1, 1],
@@ -31,18 +31,34 @@ rotations = [
 ]
 
 
-# read the input file and return a list of lists of scanner observations
+# read the input file and return a list of dictionary of scanner observations
+#  scanner_points[0][3] --> list of observations for station #0, rotated with idx #3
+#  scanner_points[0][0] --> list of observations for station #0, at identity rotation #0
+#  scanner_points[0]    --> dictionary of observations for station #0, with key == rotation_idx
 def get_scanner_points(input_lines):
-    scanner_points = []
+    flat_scanner_points = []
     sensor_number = None
     for line in input_lines:
         if line.startswith("--- scanner"):
             number_end = line[12:].index(' ')
             sensor_number = int(line[12:12+number_end])
-            scanner_points.append([])
+            flat_scanner_points.append([])
         elif len(line) > 1:
             trips = [int(x) for x in line.split(",")]
-            scanner_points[sensor_number].append(trips)
+            flat_scanner_points[sensor_number].append(trips)
+
+    # now that we have the complete list, fluff it up with the rotations
+    scanner_points = []
+    for observation in flat_scanner_points:
+        this_station = dict()
+
+        for rotation_idx in range(len(rotations)):
+            this_rotation = []
+            for point in observation:
+                this_rotation.append(rotate_point(point, rotation_idx))
+
+            this_station[rotation_idx] = this_rotation
+        scanner_points.append(this_station)
     return scanner_points
 
 
@@ -96,7 +112,7 @@ def place_station(scanner_points, known_stations, station):
             if rotation_idx == 0:
                 print(f"working {known_station} on {station}")
 
-            for known_rotate_point_idx in range(len(scanner_points[known_station])):
+            for known_rotate_point_idx in range(len(scanner_points[known_station][0])):
 
                 # print(f"{station} against {known_station_info}")
                 known_station_origin = known_station_info[0]
@@ -104,19 +120,19 @@ def place_station(scanner_points, known_stations, station):
 
                 # build an offset from station[0] point[0] to each point
                 # in the target station, and see if anything else lines up ...
-                for candidate_idx, candidate_point in enumerate(scanner_points[station]):
+                for candidate_idx, candidate_point in enumerate(scanner_points[station][0]):
                     rotated_target = rotate_point(candidate_point, rotation_idx)
-                    scanner_point = rotate_point(scanner_points[known_station][known_rotate_point_idx], known_station_rotation)
+                    scanner_point = rotate_point(scanner_points[known_station][0][known_rotate_point_idx], known_station_rotation)
                     scanner_point = add_delta(scanner_point, known_station_origin)
                     candidate_delta = get_delta(scanner_point, rotated_target)
 
                     matches = 0
                     check_list = []
-                    for test_idx, test_point in enumerate(scanner_points[station]):
+                    for test_idx, test_point in enumerate(scanner_points[station][0]):
                         rotated_test = rotate_point(test_point, rotation_idx)
                         result = add_delta(rotated_test, candidate_delta)
 
-                        for rematch_idx, rematch_point in enumerate(scanner_points[known_station]):
+                        for rematch_idx, rematch_point in enumerate(scanner_points[known_station][0]):
                             temp = rotate_point(rematch_point, known_station_rotation)
                             temp = add_delta(temp, known_station_origin)
                             if temp == result:
@@ -161,7 +177,7 @@ def main():
                 # del origins[0]
                 # unknown_set.add(0)
 
-                for point in scanner_points[match_station]:
+                for point in scanner_points[match_station][0]:
                     rotated_test = rotate_point(point, match_rotation)
                     result = add_delta(rotated_test, match_delta)
                     print(result)
