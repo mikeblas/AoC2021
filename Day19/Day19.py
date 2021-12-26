@@ -135,7 +135,7 @@ def place_station(scanner_points, known_stations, station):
                             check_list.append((result, test_point))
                     if matches >= 12:
                         # pprint.pprint(check_list)
-                        return station, rotation_idx, candidate_delta
+                        return known_station, rotation_idx, candidate_delta
     return None
 
 
@@ -167,16 +167,16 @@ def main():
             if match_info is not None:
                 (match_station, match_rotation, match_delta) = match_info
                 # print(match_info)
-                unknown_set.remove(match_station)
-                origins[match_station] = (match_delta, match_rotation)
-                print(f" station = {station}, rotation_idx = {match_rotation}, delta = {match_delta}")
+                unknown_set.remove(station)
+                origins[station] = (match_delta, match_rotation)
+                print(f" station = {station}, matched {match_station}, rotation_idx = {match_rotation}, delta = {match_delta}")
 
                 offset_match = []
-                for point in scanner_points[match_station][match_rotation]:
+                for point in scanner_points[station][match_rotation]:
                     result = add_delta(point, match_delta)
                     offset_match.append(result)
                     # print(result)
-                scanner_points[match_station][-1] = offset_match
+                scanner_points[station][-1] = offset_match
 
                 matched_one = True
                 break
