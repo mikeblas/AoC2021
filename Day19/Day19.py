@@ -155,7 +155,6 @@ def method_2d(scanner_points):
     # print(x_diffs)
 
 
-
 def method_3d(scanner_points):
     all_diffs3 = find_diffs3(scanner_points)
     pprint.pprint(all_diffs3, compact=True, width=160)
@@ -189,6 +188,15 @@ def add_delta(point1, point2):
     return x
 
 
+def get_opposite(point1):
+    x = [
+        -point1[0],
+        -point1[1],
+        -point1[2]
+    ]
+    return x
+
+
 def place_station(scanner_points, known_stations, station):
 
     # print(f"rotations = {len(rotations)}, scanner points = {len(scanner_points[station])}, match = {len(scanner_points[0])}")
@@ -209,23 +217,28 @@ def place_station(scanner_points, known_stations, station):
                 # in the target station, and see if anything else lines up ...
                 for candidate_idx, candidate_point in enumerate(scanner_points[station]):
                     rotated_target = rotate_point(candidate_point, rotations[rotation_idx])
-                    candidate_delta = get_delta(scanner_points[known_station][known_rotate_point_idx], rotated_target)
+                    scanner_point = rotate_point(scanner_points[known_station][known_rotate_point_idx], rotations[known_station_rotation])
+                    scanner_point = add_delta(scanner_point, known_station_origin)
+                    candidate_delta = get_delta(scanner_point, rotated_target)
 
                     matches = 0
+                    check_list = []
                     for test_idx, test_point in enumerate(scanner_points[station]):
                         rotated_test = rotate_point(test_point, rotations[rotation_idx])
                         result = add_delta(rotated_test, candidate_delta)
 
                         for rematch_idx, rematch_point in enumerate(scanner_points[known_station]):
                             temp = rotate_point(rematch_point, rotations[known_station_rotation])
-                            # temp = add_delta(temp, known_station_origin)
+                            temp = add_delta(temp, known_station_origin)
                             if temp == result:
                                 matches += 1
+                                check_list.append((rematch_point, test_point))
                     if matches >= 12:
                         print(f"station = {station}, rotation_idx = {rotation_idx}, candidate_idx = {candidate_idx}, matches = {matches}")
+                        # pprint.pprint(check_list)
                         return station, rotation_idx, candidate_delta
-
     return None
+
 
 def main():
 
@@ -258,6 +271,7 @@ def main():
                 print(match_info)
                 # unknown_set.remove(match_station)
                 origins[match_station] = (match_delta, match_rotation)
+                print(f"match_station {match_station} = ({match_delta}, {match_rotation}")
                 del origins[0]
                 unknown_set.add(0)
 
