@@ -4,30 +4,30 @@ import sys
 
 
 rotations = [
- [0, 1, 2, 1, 1, 1],
- [0, 2, 1, 1, 1, -1],
- [2, 0, 1, -1, 1, -1],
- [0, 2, 1, 1, -1, -1],
- [2, 0, 1, 1, 1, -1],
- [2, 1, 0, 1, -1, 1],
- [1, 2, 0, 1, 1, 1],
- [2, 1, 0, -1, 1, 1],
- [1, 2, 0, -1, -1, 1],
- [1, 0, 2, -1, 1, 1],
- [0, 1, 2, 1, -1, 1],
- [1, 0, 2, 1, 1, 1],
- [2, 0, 1, -1, 1, 1],
- [0, 2, 1, 1, -1, 1],
- [2, 0, 1, 1, 1, 1],
- [0, 2, 1, 1, 1, 1],
- [0, 1, 2, 1, 1, -1],
- [1, 0, 2, -1, 1, -1],
- [0, 1, 2, 1, -1, -1],
- [1, 0, 2, 1, 1, -1],
- [1, 2, 0, 1, -1, 1],
- [2, 1, 0, 1, 1, 1],
- [1, 2, 0, -1, 1, 1],
- [2, 1, 0, -1, -1, 1]
+    (1, 1, 1, 0, 1, 2),
+    (1, 1, 1, 1, 2, 0),
+    (1, 1, 1, 2, 0, 1),
+    (1, 1, -1, 2, 1, 0),
+    (1, 1, -1, 1, 0, 2),
+    (1, 1, -1, 0, 2, 1),
+    (1, -1, -1, 0, 1, 2),
+    (1, -1, -1, 1, 2, 0),
+    (1, -1, -1, 2, 0, 1),
+    (1, -1, 1, 2, 1, 0),
+    (1, -1, 1, 1, 0, 2),
+    (1, -1, 1, 0, 2, 1),
+    (-1, 1, -1, 0, 1, 2),
+    (-1, 1, -1, 1, 2, 0),
+    (-1, 1, -1, 2, 0, 1),
+    (-1, 1, 1, 2, 1, 0),
+    (-1, 1, 1, 1, 0, 2),
+    (-1, 1, 1, 0, 2, 1),
+    (-1, -1, 1, 0, 1, 2),
+    (-1, -1, 1, 1, 2, 0),
+    (-1, -1, 1, 2, 0, 1),
+    (-1, -1, -1, 2, 1, 0),
+    (-1, -1, -1, 1, 0, 2),
+    (-1, -1, -1, 0, 2, 1)
 ]
 
 
@@ -42,7 +42,7 @@ def get_scanner_points(input_lines):
     for line in input_lines:
         if line.startswith("--- scanner"):
             number_end = line[12:].index(' ')
-            sensor_number = int(line[12:12+number_end])
+            sensor_number = int(line[12:12 + number_end])
             flat_scanner_points.append([])
         elif len(line) > 1:
             trips = [int(x) for x in line.split(",")]
@@ -70,9 +70,9 @@ def get_scanner_points(input_lines):
 def rotate_point(point, rotation_idx):
     rot = rotations[rotation_idx]
     ret = [
-        point[rot[0]] * rot[3],
-        point[rot[1]] * rot[4],
-        point[rot[2]] * rot[5]
+        point[rot[3]] * rot[0],
+        point[rot[4]] * rot[1],
+        point[rot[5]] * rot[2]
     ]
     return ret
 
@@ -96,6 +96,7 @@ def add_delta(point1, point2):
     ]
     return x
 
+
 # invert the given point
 def get_opposite(point1):
     x = [
@@ -107,7 +108,6 @@ def get_opposite(point1):
 
 
 def place_station(scanner_points, known_stations, station):
-
     # print(f"rotations = {len(rotations)}, scanner points = {len(scanner_points[station][0])}, match = {len(scanner_points[0][0])}")
     # for each rotation ...
     for rotation_idx in range(len(rotations)):
@@ -140,8 +140,7 @@ def place_station(scanner_points, known_stations, station):
 
 
 def main():
-
-    with open('input.txt') as my_file:
+    with open('sample.txt') as my_file:
         input_lines = my_file.readlines()
     input_lines = [s.strip() for s in input_lines]
     line_count = len(input_lines)
@@ -153,7 +152,7 @@ def main():
     print(f"points per scanner: {[len(row) for row in scanner_points]}")
 
     # origins of known scanners; we normalize to station #0
-    origins = { 0: ([0, 0, 0], 0) }
+    origins = {0: ([0, 0, 0], 0)}
 
     # which stations are not known just yet?
     unknown_set = set([n for n in range(1, len(scanner_points))])
@@ -189,7 +188,5 @@ def main():
         # break
 
 
-
 if __name__ == '__main__':
     main()
-
