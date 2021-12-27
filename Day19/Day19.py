@@ -140,7 +140,7 @@ def place_station(scanner_points, known_stations, station):
 
 
 def main():
-    with open('sample.txt') as my_file:
+    with open('input.txt') as my_file:
         input_lines = my_file.readlines()
     input_lines = [s.strip() for s in input_lines]
     line_count = len(input_lines)
