@@ -107,6 +107,11 @@ def get_opposite(point1):
     return x
 
 
+def manhattan_distance(one, other):
+    dist = abs(one[0] - other[0]) + abs(one[1] - other[1]) + abs(one[2] - other[2])
+    return dist
+
+
 def place_station(scanner_points, known_stations, station):
     # print(f"rotations = {len(rotations)}, scanner points = {len(scanner_points[station][0])}, match = {len(scanner_points[0][0])}")
     # for each rotation ...
@@ -194,6 +199,18 @@ def main():
             unique_coords.add((point[0], point[1], point[2]))
 
     print(f"there are {len(unique_coords)} unique points")
+
+    # and biggest manhattan distance
+    longest = None
+    for outer_idx, one in origins.items():
+        for inner_idx, two in origins.items():
+            if inner_idx == outer_idx:
+                continue
+            distance = manhattan_distance(one[0], two[0])
+            if longest is None or longest < distance:
+                longest = distance
+
+    print(f"longest distance is {longest}")
 
 
 if __name__ == '__main__':
